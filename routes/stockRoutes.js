@@ -5,6 +5,7 @@ const { validateSymbolParam, validateHistoryQuery } = require('../middlewares/va
 
 const router = express.Router();
 
+router.get('/all', stockController.getAllStocks);
 router.get('/:symbol', validateSymbolParam, stockController.getLivePrice);
 router.get('/:symbol/profile', validateSymbolParam, stockController.getCompanyProfile);
 router.get('/:symbol/history', validateSymbolParam, validateHistoryQuery, stockController.getHistory);

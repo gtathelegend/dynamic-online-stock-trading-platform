@@ -130,6 +130,37 @@ const getHistoricalData = async (symbol, options = {}) => {
   });
 };
 
+const getAllStocks = async (options = {}) => {
+  const exchange = (options.exchange || 'US').toUpperCase();
+  const mic = options.mic ? String(options.mic).toUpperCase() : null;
+  const limit = Number(options.limit) > 0 ? Math.min(Number(options.limit), 5000) : null;
+
+  return cache.getOrSet(`stocks:all:${exchange}:${mic || 'all'}`, 3600, async () => {
+    const data = await requestProvider('/stock/symbol', { exchange, mic: mic || undefined });
+
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new AppError(`No stocks found for exchange ${exchange}`, 404);
+    }
+
+    const cleaned = data.map((item) => ({
+      symbol: item.symbol,
+      description: item.description,
+      displaySymbol: item.displaySymbol,
+      currency: item.currency,
+      type: item.type,
+      mic: item.mic,
+      figi: item.figi
+    }));
+
+    return {
+      exchange,
+      mic,
+      total: cleaned.length,
+      items: limit ? cleaned.slice(0, limit) : cleaned
+    };
+  });
+};
+
 const getTrendingStocks = async () => {
   return cache.getOrSet('market:trending', 60, async () => {
     const quotes = await Promise.all(
@@ -155,6 +186,7 @@ const getTrendingStocks = async () => {
 };
 
 module.exports = {
+  getAllStocks,
   getLivePrice,
   getCompanyProfile,
   getHistoricalData,

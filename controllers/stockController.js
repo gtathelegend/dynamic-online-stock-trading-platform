@@ -1,6 +1,16 @@
 const asyncHandler = require('../utils/asyncHandler');
 const stockApiService = require('../services/stockApiService');
 
+exports.getAllStocks = asyncHandler(async (req, res) => {
+  const { exchange, mic, limit } = req.query;
+  const data = await stockApiService.getAllStocks({ exchange, mic, limit });
+
+  res.status(200).json({
+    success: true,
+    data
+  });
+});
+
 exports.getLivePrice = asyncHandler(async (req, res) => {
   const { symbol } = req.params;
   const data = await stockApiService.getLivePrice(symbol);
